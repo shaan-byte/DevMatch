@@ -1,26 +1,20 @@
 const express=require('express');
 const app=express();
 
-const {Authadmin,Authuser}=require("./middlewares/src.js")  //importing admin and user auth middlewares
-
-//Authadmin for all admin middlewares
-
-app.use("/admin",Authadmin);
-app.use("/admin/getAllData",(req,res)=>{
-    res.send("Fetched all data for admin");
+app.use("/getalldata",(req,res,next)=>{
+    try{
+    throw new Error("This is an error");    //error handling middleware with try catch and throw
+    res.send("DATA FETCHED");}
+    catch(err){
+        res.status(500).send("Internal server error") ;
+    }
 })
 
-app.use("/admin/deleteAllData",(req,res)=>{
-    res.send("Deleted all data for admin");
-})
-
-app.use("/user/data",Authuser,(req,res)=>{
-    res.send("Fetched user data successfully");
-})  //authuser only for user data hence passed as argument
-
-app.use("/user/login",(req,res)=>{
-    res.send("User login successful");
-})  //auth user not required
+// app.use("/",(err,req,res,next)=>{
+//     if(err){
+//     res.status(500).send("Internal server error");
+//     }                                                   //alternate way to handle error with wildcard / matching
+// })
 
 app.listen(7777,()=>{
     console.log("Server is running on port 7777");
