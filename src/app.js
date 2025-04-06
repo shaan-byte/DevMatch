@@ -3,15 +3,12 @@ const app=express();
 
 const {connectDB}=require('./config/database')
 const {User}=require("./models/user")
+app.use(express.json());//convert incoming request body to json format
 
 app.post("/Signup",async (req,res)=>{
-    const Userobj=new User({
-        firstName:"Aakash",
-        lastName:"Jain",
-        emailID:"akash@gmail.com",
-        age:22,
-        gender:"Male"
-    })
+    console.log(req.body);
+    //creating a new instance of the user model
+    const Userobj=new User(req.body);   //dynamic user data adding 
     try{
        const result= await Userobj.save()
         console.log("Saved user:", result);
