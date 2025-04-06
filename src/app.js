@@ -6,15 +6,14 @@ const {User}=require("./models/user")
 app.use(express.json());//convert incoming request body to json format
 
 app.post("/Signup",async (req,res)=>{
-    console.log(req.body);
     //creating a new instance of the user model
     const Userobj=new User(req.body);   //dynamic user data adding 
     try{
        const result= await Userobj.save()
-        console.log("Saved user:", result);
+       // console.log("Saved user:", result);
         res.status(200).send("User saved successfully")
     }catch(err){
-        res.status(500).send("Error saving user",err.message)
+        res.status(500).send("Error saving user"+err.message)
     }
 })
 
@@ -64,7 +63,7 @@ app.patch("/User",async (req,res)=>{
     const email=req.body.emailID; //get user ID from request body
     const data=req.body; //get data from request body
     try{
-        const user=await User.findOneAndUpdate({emailID:email}, data)   //find user by emailID and update
+        const user=await User.findOneAndUpdate({emailID:email}, data,{runValidators:true})   //find user by emailID and update
         if(!user){
             res.status(404).send("User not found")
             }else{
