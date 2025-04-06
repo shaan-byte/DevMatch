@@ -46,6 +46,37 @@ app.get("/feed",async (req,res)=>{
     res.status(500).send("Error retrieving users"+err.message)
 }})
 
+app.delete("/User",async (req,res)=>{
+    const userid=req.body.userid;
+try{
+    const result=await User.findByIdAndDelete(userid); //find user by ID and delete
+    if(!result){
+        res.status(404).send("User not found")
+}else{
+    res.send("User deleted successfully")
+}
+}catch(err){
+    res.status(500).send("Error deleting user",err.message)
+}
+})
+
+app.patch("/User",async (req,res)=>{
+    const email=req.body.emailID; //get user ID from request body
+    const data=req.body; //get data from request body
+    try{
+        const user=await User.findOneAndUpdate({emailID:email}, data)   //find user by emailID and update
+        if(!user){
+            res.status(404).send("User not found")
+            }else{
+                res.send("User updated successfully")
+        
+    }
+}catch(e){
+    res.status(500).send("Error updating user"+e.message)
+}
+})
+
+
 connectDB().then(()=>{
     console.log("MongoDB connected successfully");
     app.listen(7777,()=>{
