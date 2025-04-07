@@ -7,6 +7,24 @@ app.use(express.json());//convert incoming request body to json format
 
 app.post("/Signup",async (req,res)=>{
     //creating a new instance of the user model
+    const allowedFields = [
+        "firstName",
+        "lastName",
+        "emailID",
+        "password",
+        "age",
+        "gender",
+        "photo",
+        "bio",
+        "skills"
+    ];
+    const isvalid=Object.keys(req.body).every((key)=>(allowedFields.includes(key))); //check if the request body contains only allowed fields
+    if(!isvalid){
+       throw new Error("Invalid fields in request body")
+    }
+    if(req.body.skills && req.body.skills.length>10){ //check if the skills array length is greater than 5
+        throw new Error("Skills array length should not be greater than 10")
+    }
     const Userobj=new User(req.body);   //dynamic user data adding 
     try{
        const result= await Userobj.save()
@@ -59,11 +77,19 @@ try{
 }
 })
 
-app.patch("/User",async (req,res)=>{
-    const email=req.body.emailID; //get user ID from request body
+app.patch("/User/:userid",async (req,res)=>{
+    const userid=req.params?.userid; //get user ID from request body
     const data=req.body; //get data from request body
     try{
-        const user=await User.findOneAndUpdate({emailID:email}, data,{runValidators:true})   //find user by emailID and update
+        const ALLOWED_UPDATES=["userid","photo","bio","skills","age"] //allowed updates for user
+        const isupdateallowed=Object.keys(data).every((key)=>ALLOWED_UPDATES.includes(key)) //check if the update is allowed
+        if(!isupdateallowed){
+            throw new Error("Invalid updates")
+        }
+        if(data.skills.length>10){ //check if the skills array length is greater than 5
+            throw new Error("Skills array length should not be greater than 10")
+        }
+        const user=await User.findByIdAndUpdate(userid, data,{runValidators:true})   //find user by emailID and update
         if(!user){
             res.status(404).send("User not found")
             }else{
