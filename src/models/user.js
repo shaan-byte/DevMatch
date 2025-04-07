@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const Validate=require("validator") //importing validator module
 const UserSchema=new mongoose.Schema({
     firstName:{
         type:String,
@@ -16,12 +16,22 @@ const UserSchema=new mongoose.Schema({
         unique:true,
         lowercase:true,
         trim:true,
+        validate(value){
+            if(!Validate.isEmail(value)){
+                throw new Error("Enter a valid Email"+value)
+            }
+        }
     },
     password:{
         type:String,
         required:true,
         minLength:6,
         maxLength:20,
+        validate(value){
+            if(!Validate.isStrongPassword(value)){
+                throw new Error("Enter a Strong password with 1 lowercase 1 uppercase a number a special character and 8 letters ")
+            }
+        }
     },
     age:{
         type:Number,
@@ -41,7 +51,12 @@ const UserSchema=new mongoose.Schema({
     },
     photo:{
         type:String,
-        default:"https://th.bing.com/th/id/OIP.VWwq2xtthMXiOFa4IuqAwwHaHa?rs=1&pid=ImgDetMain"
+        default:"https://th.bing.com/th/id/OIP.VWwq2xtthMXiOFa4IuqAwwHaHa?rs=1&pid=ImgDetMain",
+        validate(value){
+            if(!Validate.isURL(value)){
+                throw new Error("Enter a valid URL"+value)
+            }
+        }
     }
     ,bio:{
         type:String,
@@ -50,6 +65,7 @@ const UserSchema=new mongoose.Schema({
     },
     skills:{
         type:[String],
+        required:true,
     }
 },{timestamps:true})
 

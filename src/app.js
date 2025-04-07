@@ -86,7 +86,7 @@ app.patch("/User/:userid",async (req,res)=>{
         if(!isupdateallowed){
             throw new Error("Invalid updates")
         }
-        if(data.skills.length>10){ //check if the skills array length is greater than 5
+        if(data.skills && data.skills.length>10){ //check if the skills array length is greater than 5
             throw new Error("Skills array length should not be greater than 10")
         }
         const user=await User.findByIdAndUpdate(userid, data,{runValidators:true})   //find user by emailID and update
