@@ -3,30 +3,23 @@ const app=express();
 
 const {connectDB}=require('./config/database')
 const {User}=require("./models/user")
+const {validatesignupdata}=require("./utils/validation")
+const bcrypt=require("bcrypt")
 app.use(express.json());//convert incoming request body to json format
 
+
 app.post("/Signup",async (req,res)=>{
-    //creating a new instance of the user model
-    const allowedFields = [
-        "firstName",
-        "lastName",
-        "emailID",
-        "password",
-        "age",
-        "gender",
-        "photo",
-        "bio",
-        "skills"
-    ];
-    const isvalid=Object.keys(req.body).every((key)=>(allowedFields.includes(key))); //check if the request body contains only allowed fields
-    if(!isvalid){
-       throw new Error("Invalid fields in request body")
-    }
-    if(req.body.skills && req.body.skills.length>10){ //check if the skills array length is greater than 5
-        throw new Error("Skills array length should not be greater than 10")
-    }
-    const Userobj=new User(req.body);   //dynamic user data adding 
-    try{
+    //validate the signup data
+    try{validatesignupdata(req); //validate the signup data
+
+    //encrypt the password
+    const {firstName,lastName,emailID,password,age,gender}=req.body; //get password from request body
+    const hashpassword=await bcrypt.hash(password,10); //hash the password with 10 rounds of salting
+    //add user data
+    const Userobj=new User({
+        firstName,lastName,emailID,password:hashpassword,age,gender //create a new user object with the data from request body
+    });   
+    
        const result= await Userobj.save()
        // console.log("Saved user:", result);
         res.status(200).send("User saved successfully")
@@ -46,7 +39,7 @@ app.get("/User", async (req,res)=>{         //find data via email and GET
             res.send(Users)
         }
     }catch(err){
-        res.status(500).send("Error retrieving user",err.message)
+        res.status(500).send("Error retrieving user"+err.message)
     }
 })
 
@@ -73,7 +66,7 @@ try{
     res.send("User deleted successfully")
 }
 }catch(err){
-    res.status(500).send("Error deleting user",err.message)
+    res.status(500).send("Error deleting user"+err.message)
 }
 })
 
@@ -81,7 +74,7 @@ app.patch("/User/:userid",async (req,res)=>{
     const userid=req.params?.userid; //get user ID from request body
     const data=req.body; //get data from request body
     try{
-        const ALLOWED_UPDATES=["userid","photo","bio","skills","age"] //allowed updates for user
+        const ALLOWED_UPDATES=["photo","bio","skills","age"] //allowed updates for user
         const isupdateallowed=Object.keys(data).every((key)=>ALLOWED_UPDATES.includes(key)) //check if the update is allowed
         if(!isupdateallowed){
             throw new Error("Invalid updates")

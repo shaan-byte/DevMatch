@@ -25,8 +25,6 @@ const UserSchema=new mongoose.Schema({
     password:{
         type:String,
         required:true,
-        minLength:6,
-        maxLength:20,
         validate(value){
             if(!Validate.isStrongPassword(value)){
                 throw new Error("Enter a Strong password with 1 lowercase 1 uppercase a number a special character and 8 letters ")
@@ -65,7 +63,6 @@ const UserSchema=new mongoose.Schema({
     },
     skills:{
         type:[String],
-        required:true,
     }
 },{timestamps:true})
 
