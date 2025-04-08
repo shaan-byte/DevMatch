@@ -28,6 +28,23 @@ app.post("/Signup",async (req,res)=>{
     }
 })
 
+//login API
+app.post("/Login",async (req,res)=>{
+    try{const {emailID,password}=req.body; //get email and password from request body
+    const user=await User.findOne({emailID:emailID}) //find user by emailID
+    if(!user){
+        throw new Error("Invalid Credentials") //if user not found
+    }
+    const ispasswordvalid=await bcrypt.compare(password,user.password) //compare the password with the hashed password
+    if(!ispasswordvalid){
+        throw new Error("Invalid Credentials") //if password is not valid
+    }else{
+        res.status(200).send("Login successful") //if login is successful
+    }}catch(err){
+        res.status(500).send("Error logging in "+err.message) //if error occurs
+    }
+})
+
 app.get("/User", async (req,res)=>{         //find data via email and GET
     const email=req.body.emailID;           //get email from request body
     try{
