@@ -5,7 +5,10 @@ const {connectDB}=require('./config/database')
 const {User}=require("./models/user")
 const {validatesignupdata}=require("./utils/validation")
 const bcrypt=require("bcrypt")
+const cookieParser=require("cookie-parser")
+const jwt=require("jsonwebtoken")
 app.use(express.json());//convert incoming request body to json format
+app.use(cookieParser()) //parse cookies from incoming requests
 
 
 app.post("/Signup",async (req,res)=>{
@@ -39,9 +42,33 @@ app.post("/Login",async (req,res)=>{
     if(!ispasswordvalid){
         throw new Error("Invalid Credentials") //if password is not valid
     }else{
+        //if password is valid, create a JWT token and send it in the response
+        const token=jwt.sign({_id:user._id}, "Devmatch123@$")
+        res.cookie("token",token)
         res.status(200).send("Login successful") //if login is successful
     }}catch(err){
         res.status(500).send("Error logging in "+err.message) //if error occurs
+    }
+})
+
+app.get("/Profile",async (req,res)=>{
+  try{const cookie=req.cookies; 
+    //get token from cookies
+    const token=cookie.token;
+    if(!token){
+        throw new Error("Unauthorized Invalid token") //if token is not present in cookies
+    }
+    //verify the token
+    const decoded=await jwt.verify(token,"Devmatch123@$")
+    //find user by ID
+    const {_id}=decoded; //get user ID from decoded token
+    const user=await User.findById(_id) //find user by ID
+    if(!user){
+        throw new Error ("User not found") //if user not found
+    }else{
+        res.status(200).send(user) //if user found, send user data
+    }}catch(err){
+        res.status(500).send("Error retrieving user"+err.message) //if error occurs
     }
 })
 
