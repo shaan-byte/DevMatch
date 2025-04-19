@@ -44,7 +44,7 @@ app.post("/Login",async (req,res)=>{
         throw new Error("Invalid Credentials") //if password is not valid
     }else{
         //if password is valid, create a JWT token and send it in the response
-        const token=jwt.sign({_id:user._id}, "Devmatch123@$")
+        const token=await user.getJWT();
         res.cookie("token",token)
         res.status(200).send("Login successful") //if login is successful
     }}catch(err){

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Validate=require("validator") //importing validator module
+const bcrypt=require("bcrypt") //importing bcrypt module for password hashing
+const jwt=require("jsonwebtoken") //importing jsonwebtoken module for token generation
 const UserSchema=new mongoose.Schema({
     firstName:{
         type:String,
@@ -65,6 +67,15 @@ const UserSchema=new mongoose.Schema({
         type:[String],
     }
 },{timestamps:true})
+UserSchema.methods.getJWT=async function(){
+    const user=this; //get user object
+    const token=await jwt.sign({_id:user._id},"Devmatch123@$",{
+        expiresIn:"7days" //set token expiration time to 7 days
+    }) //create a JWT token with user ID and secret key
+    return token; 
+}
+
+
 
 const User=mongoose.model("User",UserSchema);
 
